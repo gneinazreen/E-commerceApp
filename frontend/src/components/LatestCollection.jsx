@@ -8,8 +8,10 @@ const LatestCollection = () => {
     const {products} = useContext(ShopContext)
     const [latestProducts, setLatestProducts] = React.useState([])
     React.useEffect(()=>{
+        console.log('LatestCollection - All products:', products)
         setLatestProducts(products.slice(0,10))
-    }, [])
+        console.log('LatestCollection - Latest products:', products.slice(0,10))
+    }, [products])
   return (
     <div className='my-10'>
         <div className='text-center py-8 text-3xl'>

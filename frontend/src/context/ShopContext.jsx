@@ -1,17 +1,21 @@
-import { createContext } from "react";
-import { products } from "../assets/assets";
+import { createContext, useState } from "react";
+// import { products } from "../assets/assets";
 import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios'
 
 export const ShopContext = createContext()
 
 const ShopContextProvider = (props) =>{
     const currency = '$'
     const delivery_fee = 10
+    const backendUrl = import.meta.env.VITE_BACKEND_URL
     const [search, setSearch] = React.useState('')
     const [showSearch, setShowSearch] = React.useState(false)
     const [cartItems, setCartItems] = React.useState({})
+    const [products, setProducts] = useState([])
+    const [token, setToken] = useState('')
     const navigate = useNavigate()
 
     const addToCart = async (itemId, size) =>{
@@ -72,8 +76,35 @@ const ShopContextProvider = (props) =>{
     // useEffect(()=>{
     //     console.log(cartItems)
     // }, [cartItems])
+    const getProductsData = async () =>{
+        try{
+            console.log("ENV FULL:", import.meta.env);
+            console.log('Backend URL:', backendUrl)
+            const response = await axios.get(backendUrl + '/api/product/list')
+            console.log('Products Response:', response.data);
+            if(response.data.success){
+                console.log('Setting products:', response.data.products)
+                setProducts(response.data.products)
+            }else{
+                toast.error(response.data.message)
+            }
+        }catch(error){
+            console.error('Error fetching products:', error);
+            toast.error(error.message)
+            
+        }
+    }
+    useEffect(()=>{
+        getProductsData()
+    },[])
+
+    useEffect(()=>{
+        if(!token && localStorage.getItem('token')){
+            setToken(localStorage.getItem('token'))
+        }
+    },[])
     const value = {
-        products, currency, delivery_fee, search, setSearch, showSearch, setShowSearch, cartItems, addToCart, getCartCount, updateQuantity, getCartAmount, navigate
+        products, currency, delivery_fee, search, setSearch, showSearch, setShowSearch, cartItems, addToCart, getCartCount, updateQuantity, getCartAmount, navigate, backendUrl, setToken, token
     }
     return (
         <ShopContext.Provider value={value}>
